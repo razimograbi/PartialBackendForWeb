@@ -22,14 +22,7 @@ const goalsRouter = require("./routes/goals");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: [
-      "http://localhost:2501",
-      "https://PartialBackendForWeb.onrender.com",
-    ],
-  })
-); // allow any one to send you http requests
+app.use(cors()); // allow any one to send you http requests
 
 //routing
 app.use("/login", loginRoute);
