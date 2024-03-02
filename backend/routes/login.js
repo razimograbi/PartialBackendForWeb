@@ -29,14 +29,12 @@ router.post("/", async (req, res) => {
       process.env.SECRET_KEY,
       { expiresIn: "1h" }
     );
-    res.cookie("token", token, { httpOnly: true });
-    res
-      .status(200)
-      .json({
-        message: "Login successful.",
-        user: { email: user.email, name: user.name },
-        token: token,
-      });
+    res.cookie("token", token);
+    res.status(200).json({
+      message: "Login successful.",
+      user: { email: user.email, name: user.name },
+      token: token,
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error while attempting login." });
