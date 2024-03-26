@@ -35,11 +35,9 @@ router.post("/add", async (req, res) => {
 
   // Validate input (basic validation)
   if (!name || typeof amount !== "number") {
-    return res
-      .status(400)
-      .send({
-        message: "Invalid input. Please provide all required goal details.",
-      });
+    return res.status(400).send({
+      message: "Invalid input. Please provide all required goal details.",
+    });
   }
 
   if (!category || typeof category !== "string") {
@@ -88,6 +86,47 @@ router.post("/add", async (req, res) => {
     res
       .status(500)
       .send({ message: "Failed to add goal.", error: error.message });
+  }
+});
+
+// a method to delete a goal
+
+router.delete("/delete/:goalId", async (req, res) => {
+  const goalId = req.params.goalId;
+  const userEmail = req.user.email;
+
+  if (!userEmail || !goalId) {
+    return res
+      .status(404)
+      .send({
+        message:
+          "Please add pass the value of the goalId to the http request, example : https:.../delete/12354  .",
+      });
+  }
+
+  try {
+    const updateResult = await User.updateOne(
+      { email: userEmail }, // Find user by their unique email
+      { $pull: { goals: { _id: goalId } } } // Remove the goal object
+    );
+
+    // Check if the update operation found and updated the user
+    if (updateResult.matchedCount === 0) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    if (updateResult.modifiedCount === 0) {
+      return res
+        .status(404)
+        .send({ message: "Goal not found or already removed." });
+    }
+
+    res.status(200).send({ message: "Goal deleted successfully." });
+  } catch (error) {
+    console.error("Failed to delete goal:", error);
+    res
+      .status(500)
+      .send({ message: "Failed to delete goal.", error: error.message });
   }
 });
 
