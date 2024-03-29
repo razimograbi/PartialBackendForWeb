@@ -28,6 +28,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 // add a new goal
 router.post("/add", async (req, res) => {
   let { name, category, amount, amountSaved, monthlyPayment, setGoalDate } =
@@ -129,5 +130,45 @@ router.delete("/delete/:goalId", async (req, res) => {
       .send({ message: "Failed to delete goal.", error: error.message });
   }
 });
+
+//Adan trying .......
+// Add amount to savings for a specific goal
+router.post('/addAmountToGoal', async (req, res) => {
+  //const goalId = req.params.goalId;
+  const userEmail = req.user.email;
+  const { goalId, amount } = req.body;
+
+  if (!userEmail || !goalId || !amount || typeof amount !== "number") {
+    return res.status(400).send({
+      message: "Please provide a valid goalId and amount.",
+    });
+  }
+
+  try {
+    const updateResult = await User.updateOne(
+      { email: userEmail, "goals._id": goalId },
+      { $inc: { "goals.$.amountSaved": amount } }
+    );
+
+    // Check if the update operation found and updated the user
+    if (updateResult.matchedCount === 0) {
+      return res.status(404).send({ message: "User or Goal not found." });
+    }
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(404).send({
+        message: "Goal not found or already removed.",
+      });
+    }
+
+    res.status(200).send({ message: "Amount saved for the goal updated successfully." });
+  } catch (error) {
+    console.error("Failed to update amount saved for goal:", error);
+    res
+      .status(500)
+      .send({ message: "Failed to update amount saved for goal.", error: error.message });
+  }
+});
+
 
 module.exports = router;
