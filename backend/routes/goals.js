@@ -136,19 +136,19 @@ router.delete("/delete/:goalId", async (req, res) => {
 router.put('/addAmountToGoal', async (req, res) => {
   //const goalId = req.params.goalId;
   const userEmail = req.user.email;
-  const { goalId, amount } = req.body;
+  const { goalId, addedAmount } = req.body;
 
-  if (!userEmail || !goalId || !amount || typeof amount !== "number") {
+  if (!userEmail || !goalId || !addedAmount || typeof addedAmount !== "number") {
     return res.status(400).send({
       message: "Please provide a valid goalId and amount.",
-      message: userEmail , goalId , amount, 
+  
     });
   }
 
   try {
     const updateResult = await User.updateOne(
       { email: userEmail, "goals._id": goalId },
-      { $inc: { "goals.$.amountSaved": amount } }
+      { $inc: { "goals.$.amountSaved": addedAmount } }
     );
 
     // Check if the update operation found and updated the user
@@ -162,7 +162,7 @@ router.put('/addAmountToGoal', async (req, res) => {
       });
     }
 
-    res.status(200).send({ message: "Amount saved for the goal updated successfully." });
+    res.status(200).send({ message: "addedAmount saved for the goal updated successfully." });
   } catch (error) {
     console.error("Failed to update amount saved for goal:", error);
     res
