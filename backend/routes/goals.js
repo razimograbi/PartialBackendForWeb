@@ -131,9 +131,9 @@ router.delete("/delete/:goalId", async (req, res) => {
   }
 });
 
-//Adan trying .......
+//Adan trying 
 // Add amount to savings for a specific goal
-router.post('/addAmountToGoal', async (req, res) => {
+router.put('/addAmountToGoal', async (req, res) => {
   //const goalId = req.params.goalId;
   const userEmail = req.user.email;
   const { goalId, amount } = req.body;
