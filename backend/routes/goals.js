@@ -141,6 +141,7 @@ router.put('/addAmountToGoal', async (req, res) => {
   if (!userEmail || !goalId || !amount || typeof amount !== "number") {
     return res.status(400).send({
       message: "Please provide a valid goalId and amount.",
+      message: userEmail , goalId , amount, 
     });
   }
 
