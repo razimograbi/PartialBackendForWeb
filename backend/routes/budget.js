@@ -60,7 +60,7 @@ router.post("/add", async (req, res) => {
 
 // Edit a specific budget by _id
 router.put("/edit", async (req, res) => {
-  const { budgetId, newBudget } = req.body;
+  let { budgetId, newBudget } = req.body;
   const userEmail = req.userData.email;
   if (!userEmail) {
     return res
@@ -69,18 +69,28 @@ router.put("/edit", async (req, res) => {
   }
 
   // Validate input
-  if (!budgetId || !newBudget || !mongoose.Types.ObjectId.isValid(budgetId)) {
+  if (!budgetId || !newBudget || newBudget < 0) {
     return res.status(400).send({
       message:
         "Invalid input. Please provide a valid budgetId and newBudget data.",
     });
   }
 
+  if (typeof budgetId !== "string") {
+    try {
+      budgetId = budgetId.toString();
+    } catch (error) {
+      return res
+        .status(400)
+        .send({ message: "Invalid BudgetId must be a String" });
+    }
+  }
+
   try {
     const updateResult = await User.updateOne(
       { email: userEmail }, // Find user by their unique email
       { $set: { "budget.$[elem].limit": newBudget } }, // Replace the budget object
-      { arrayFilters: [{ "elem._id": mongoose.Types.ObjectId(budgetId) }] } // Specify the budget to replace using its _id
+      { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(budgetId) }] } // Specify the budget to replace using its _id
     );
 
     // Check if successful
