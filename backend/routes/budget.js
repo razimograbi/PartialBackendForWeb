@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../model/userModel");
+const mongoose = require("mongoose");
 
 // get all budgets
 router.get("/", (req, res) => {
@@ -20,12 +21,10 @@ router.post("/add", async (req, res) => {
   const { category, date, limit } = req.body;
 
   if (!category || limit == null || limit == undefined || limit < 0) {
-    return res
-      .status(400)
-      .send({
-        message:
-          "Invalid input. Ensure category is specified and limit is a non-negative number.",
-      });
+    return res.status(400).send({
+      message:
+        "Invalid input. Ensure category is specified and limit is a non-negative number.",
+    });
   }
 
   let budgetDate = date
@@ -71,12 +70,10 @@ router.put("/edit", async (req, res) => {
 
   // Validate input
   if (!budgetId || !newBudget || !mongoose.Types.ObjectId.isValid(budgetId)) {
-    return res
-      .status(400)
-      .send({
-        message:
-          "Invalid input. Please provide a valid budgetId and newBudget data.",
-      });
+    return res.status(400).send({
+      message:
+        "Invalid input. Please provide a valid budgetId and newBudget data.",
+    });
   }
 
   try {
