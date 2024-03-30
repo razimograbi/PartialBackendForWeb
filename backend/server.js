@@ -17,6 +17,7 @@ const userHomeRouter = require("./routes/userHome");
 const expensesRouter = require("./routes/expenses");
 const budgetRouter = require("./routes/budget");
 const goalsRouter = require("./routes/goals");
+const incomeRouter = require("./routes/income");
 
 // middleWare
 app.use(express.json());
@@ -31,6 +32,7 @@ app.use("/pages/userHome", [cookieJwtAuth, fetchUserData], userHomeRouter);
 app.use("/pages/api/expenses", [cookieJwtAuth, fetchUserData], expensesRouter);
 app.use("/pages/api/budget", [cookieJwtAuth, fetchUserData], budgetRouter);
 app.use("/pages/api/goals", cookieJwtAuth, goalsRouter);
+app.use("/income", cookieJwtAuth, incomeRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({ success: true });

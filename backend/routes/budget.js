@@ -87,26 +87,32 @@ router.put("/edit", async (req, res) => {
   }
 
   try {
+    // const budgetObjectId = new mongoose.Types.ObjectId(parseInt(budgetId)); // Ensure budgetId is correctly formatted as ObjectId
     const updateResult = await User.updateOne(
       { email: userEmail }, // Find user by their unique email
-      { $set: { "budget.$[elem].limit": newBudget } }, // Replace the budget object
-      { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(budgetId) }] } // Specify the budget to replace using its _id
+      { $set: { "budget.$[elem].limit": newBudget } }, // Update the budget limit
+      { arrayFilters: [{ "elem._id": budgetId }] } // Correctly instantiate ObjectId
     );
 
-    // Check if successful
     if (updateResult.matchedCount === 0) {
       return res
         .status(404)
-        .send({ message: "User not found or budget does not exist." });
+        .json({ success: false, message: "User or budget item not found." });
+    } else if (updateResult.modifiedCount === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Budget item was not updated." });
     }
 
     res
       .status(200)
-      .send({ message: "Budget edited successfully.", budget: newBudget });
+      .json({ success: true, message: "Budget item updated successfully." });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: "Failed to edit budget.", error: error.message });
+    console.error("Failed to edit budget item:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating budget item.",
+    });
   }
 });
 
