@@ -1,8 +1,14 @@
+/*
+ * This file defines routes for managing user expenses in a personal finance management application.
+ * It includes routes to view, add, and retrieve user expenses, as well as to calculate upcoming expenses for the current month.
+ * Each route makes use of the users email from the request data.
+ */
+
 const express = require("express");
 const router = express.Router();
 const User = require("../model/userModel");
 
-//    Get :  https://partialbackendforweb.onrender.com/pages/api/expenses
+// GET: Retrieves basic user data including expenses
 
 router.get("/", async (req, res) => {
   const { name, email, income, expenses, goals, budget } = req.userData;
@@ -17,17 +23,17 @@ router.get("/", async (req, res) => {
   res.json(responseData);
 });
 
+// POST: Adds a new expense to the users account
 router.post("/add", async (req, res) => {
   const { category, amount, numberOfPayments, startDate } = req.body;
   // Validate the input
   if (!category || amount <= 0 || numberOfPayments <= 0) {
-    return res
-      .status(400)
-      .send({
-        message:
-          "Invalid input. Ensure category is specified and amount is greater than zero.",
-      });
+    return res.status(400).send({
+      message:
+        "Invalid input. Ensure category is specified and amount is greater than zero.",
+    });
   }
+  // Calculate the end date if there are multiple payments
   const numberOfPaymentsAfterCasting = Number(numberOfPayments);
 
   let endDate;
@@ -49,6 +55,7 @@ router.post("/add", async (req, res) => {
     endDate: endDate || null,
   };
 
+  // Add expense to the database
   try {
     await User.updateOne(
       { email: req.userData.email }, // Find user by email
@@ -62,6 +69,7 @@ router.post("/add", async (req, res) => {
   }
 });
 
+// GET: Retrieves expenses for a specific month and year
 router.get("/retrieve", async (req, res) => {
   let { month, year } = req.query;
 
@@ -72,6 +80,7 @@ router.get("/retrieve", async (req, res) => {
   }
   year = Number(year);
 
+  // Calculate start and end dates for the query
   let startDate, endDate;
   if (month) {
     month = Number(month);
@@ -82,6 +91,7 @@ router.get("/retrieve", async (req, res) => {
     endDate = new Date(year, 11, 31); // End of the year
   }
 
+  // Filter expenses based on the query dates
   try {
     const user = req.userData;
 
@@ -105,6 +115,7 @@ router.get("/retrieve", async (req, res) => {
   }
 });
 
+// GET: Retrieves upcoming expenses for the current month
 router.get("/upcoming-expenses", async (req, res) => {
   const currentDate = new Date();
 
