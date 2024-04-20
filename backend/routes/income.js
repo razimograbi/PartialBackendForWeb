@@ -59,90 +59,9 @@ router.post("/add", async (req, res) => {
   }
 });
 
-router.post("/Adanadd", async (req, res) => {
-  const { amount, date } = req.body;
 
-  // Validate input (basic validation)
-  if (!amount || typeof amount !== "number") {
-    return res.status(400).send({
-      message:
-        "Invalid input. Please provide all required income details. the amount must be a number",
-    });
-  }
 
-  // Prepare the income object
-  const incomeEntry = {
-    amount,
-    date: date ? new Date(date) : new Date(), // Use current date if none provided
-  };
-
-  try {
-    const userEmail = req.user.email;
-
-    // Check if an income entry exists for the provided month and year
-    const existingIncomeIndex = await User.findOne({
-      email: userEmail,
-      "income.date": {
-        $gte: new Date(incomeEntry.date.getFullYear(), incomeEntry.date.getMonth(), 1),
-        $lt: new Date(incomeEntry.date.getFullYear(), incomeEntry.date.getMonth() + 1, 1)
-      }
-    }).select('income');
-
-    if (existingIncomeIndex) {
-      const existingIncome = existingIncomeIndex.income.find(entry => {
-        return entry.date.getFullYear() === incomeEntry.date.getFullYear() && entry.date.getMonth() === incomeEntry.date.getMonth();
-      });
-
-      if (existingIncome) {
-        // Override existing income entry
-        const updateResult = await User.updateOne(
-          {
-            email: userEmail,
-            "income.date": existingIncome.date
-          },
-          {
-            $set: { "income.$.amount": amount }
-          }
-        );
-
-        if (updateResult.matchedCount === 0) {
-          return res.status(404).send({ message: "User not found." });
-        }
-
-        res.status(200).send({ message: "Income updated successfully.", income: incomeEntry });
-      } else {
-        // Add new income entry
-        const updateResult = await User.updateOne(
-          { email: userEmail }, // Find user by their unique email
-          { $push: { income: incomeEntry } } // Add the new income entry
-        );
-
-        if (updateResult.matchedCount === 0) {
-          return res.status(404).send({ message: "User not found." });
-        }
-
-        res.status(200).send({ message: "Income added successfully.", income: incomeEntry });
-      }
-    } else {
-      // Add new income entry
-      const updateResult = await User.updateOne(
-        { email: userEmail }, // Find user by their unique email
-        { $push: { income: incomeEntry } } // Add the new income entry
-      );
-
-      if (updateResult.matchedCount === 0) {
-        return res.status(404).send({ message: "User not found." });
-      }
-
-      res.status(200).send({ message: "Income added successfully.", income: incomeEntry });
-    }
-  } catch (error) {
-    console.error("Failed to add/update income:", error);
-    res.status(500).send({ message: "Failed to add/update income.", error: error.message });
-  }
-});
-
-router.post("/Adanadd2", async (req, res) => {
+router.post("/add2", async (req, res) => {
   const { amount, month, year } = req.body;
 
   // Validate input (basic validation)
